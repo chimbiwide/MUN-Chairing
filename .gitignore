@@ -1,0 +1,13 @@
+/build/
+/.cache/
+compile_commands.json
+*.o
+*.a
+# what the app writes into the folder it runs from
+mun_session.txt
+mun_session.txt.tmp
+mun_session.txt.bak
+mun_log_*.txt
+mun_stats_*.csv
+# tests folder
+/tests/

@@ -1,0 +1,59 @@
+name: CMake
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  linux:
+    name: Linux (Fedora 44, GCC 16)
+    runs-on: ubuntu-latest
+    container: fedora:44
+    steps:
+      - name: Install dependencies
+        run: |
+          dnf install -y gcc cmake git \
+              mesa-libGL-devel libX11-devel libXcursor-devel libXinerama-devel \
+              libXrandr-devel libXi-devel libXext-devel libXfixes-devel alsa-lib-devel
+
+      - uses: actions/checkout@v7
+        with:
+          submodules: recursive
+
+      - name: Configure
+        run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+      - name: Build
+        run: cmake --build build --parallel "$(nproc)"
+      - name: Test
+        run: ctest --test-dir build --output-on-failure
+
+  windows:
+    name: Windows (MinGW)
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          submodules: recursive
+
+      - name: Show toolchain
+        run: |
+          gcc --version
+          cmake --version
+
+      - name: Configure
+        run: cmake --preset windows
+
+      - name: Build
+        run: cmake --build --preset windows --parallel $env:NUMBER_OF_PROCESSORS
+
+      - name: Test
+        run: ctest --preset windows --output-on-failure
