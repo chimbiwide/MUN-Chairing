@@ -78,6 +78,7 @@ static void handle_keys(App *app) {
             app->present = false;
             app->blank = false;
         }
+        else app->show_speakers = false;
         return;
     }
     if (IsKeyPressed(KEY_F1) || (shift && IsKeyPressed(KEY_SLASH))) {
@@ -108,7 +109,7 @@ static void handle_keys(App *app) {
     // typing needs the chair's panels, so these leave the presentation view
     if (IsKeyPressed(KEY_A)) {
         app->present = false;
-        focus_field(app, app->speaker_pick.text);
+        open_speakers_list(app);
         drop_typed_keys();
     }
     if (IsKeyPressed(KEY_M)) {
@@ -179,33 +180,37 @@ static void draw_frame(App *app) {
         float u = app->u;
         float top = 46.0f * u;
         float pad = 12.0f * u;
-        float rightW = width * 0.40f;
-        if (rightW < 380.0f) rightW = 380.0f;
-        Rectangle left = { pad, top + pad, width - rightW - 2 * pad, height - top - 2 * pad };
-        float transportH = 60.0f * u;
-        Rectangle stage = { left.x, left.y, left.width, left.height - transportH - pad };
-        Rectangle transport = { left.x, stage.y + stage.height + pad, left.width, transportH };
-        Rectangle right = { width - rightW, top + pad, rightW - pad, left.height };
-        float speakersH = right.height * 0.58f;
-        Rectangle speakers = { right.x, right.y, right.width, speakersH };
-        Rectangle motions = { right.x, right.y + speakersH + pad, right.width, right.height - speakersH - pad };
+        // the panels change with the focus only while the mouse button is up, so a click lands where it was aimed
+        if (!IsMouseButtonDown(MOUSE_BUTTON_LEFT) && !IsMouseButtonReleased(MOUSE_BUTTON_LEFT)) app->layout_focus = app->focus;
+        bool adding = app->layout_focus == app->speaker_pick.text;
+        bool proposing = app->layout_focus == app->motion_quick;
+        bool listed = app->show_speakers || adding;
+
+        // the motions fill the window (the clock is on the projector); the speakers' list, once asked for,
+        // takes the right of it
+        Rectangle body = { pad, top + pad, width - 2 * pad, height - top - 2 * pad };
+        Rectangle side = { 0 };
+        if (listed) {
+            float sideW = width * 0.40f;
+            if (sideW < 380.0f) sideW = 380.0f;
+            side = (Rectangle){ width - sideW, body.y, sideW - pad, body.height };
+            body.width = side.x - pad - body.x;
+        }
 
         draw_top_bar(app, (Rectangle){ 0, 0, width, top });
-        draw_stage(app, stage, false);
-        draw_transport(app, transport);
-        // the box being typed in is drawn before its grid: a click on a tile may give the focus back
-        if (app->focus == app->speaker_pick.text) {
-            draw_speakers_panel(app, speakers);
-            draw_roster_grid(app, motions, false);
-        }
-        else if (app->focus == app->motion_quick) {
-            draw_motions_panel(app, motions);
-            draw_roster_grid(app, speakers, true);
-        }
-        else {
-            draw_speakers_panel(app, speakers);
-            draw_motions_panel(app, motions);
-        }
+        // while a box is typed in the roster comes up under it: a click on a tile adds that speaker
+        // or names the motion's proposer
+        Rectangle motions = body;
+        Rectangle speakers = side;
+        float tilesH = body.height * 0.42f;
+        if (proposing) motions.height -= tilesH + pad;
+        if (adding) speakers.height -= tilesH + pad;
+        // the boxes go before the tiles, a click on a tile may give the focus back. the speakers' box goes
+        // before the motion line, so the Enter that brings the list out is not taken by its box as well
+        if (listed) draw_speakers_panel(app, speakers);
+        draw_motions_panel(app, motions);
+        if (adding) draw_roster_grid(app, (Rectangle){ side.x, speakers.y + speakers.height + pad, side.width, tilesH }, false);
+        if (proposing) draw_roster_grid(app, (Rectangle){ body.x, motions.y + motions.height + pad, body.width, tilesH }, true);
     }
 
     if (modal) {

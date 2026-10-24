@@ -452,7 +452,7 @@ void draw_toast(App *app) {
     float screenW = (float)GetScreenWidth();
     float screenH = (float)GetScreenHeight();
     float boxH = size * 2.2f;
-    // over the right column, clear of the clock and the buttons under it; centred when presenting
+    // low on the right, clear of the motion line and the motion being voted on; centred when presenting
     Rectangle box = { (screenW - width) / 2.0f, screenH - boxH - 40.0f * u, width, boxH };
     if (!app->present) {
         float columnX = screenW - (screenW * 0.40f < 380.0f ? 380.0f : screenW * 0.40f);

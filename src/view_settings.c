@@ -180,7 +180,7 @@ void draw_help(App *app) {
         { "F11", "Fullscreen" },
         { "Ctrl+Z", "Undo the last action" },
         { "Ctrl+S / E / Q", "Save now / export the log / quit" },
-        { "Esc", "Leave a box, close a dialog, leave presentation" },
+        { "Esc", "Leave a box, a dialog, presentation, the speakers' list" },
     };
     float y = body.y;
     draw_text_in(app->bold, "Keyboard", (Rectangle){ body.x, y, half, lineH }, size * 1.1f, t->text, 0);
@@ -203,6 +203,7 @@ void draw_help(App *app) {
         { "unmod 15 usa", "a 15 minute unmod moved by the United States" },
         { "st 1:30", "set the speaking time to 1 min 30 s" },
         { "ext 5  close", "extend the caucus by 5 min / close debate" },
+        { "speakers list  gsl", "show the speakers' list beside the motions" },
     };
     float x = body.x + half + 30.0f * u;
     y = body.y;

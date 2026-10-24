@@ -124,11 +124,12 @@ rr 45 kenya water                    round robin, 45 s each, starting with Kenya
 ext 5                                extend the caucus that just ran by 5 minutes
 st 1:30                              set the speaking time to 1:30
 consult 10 / intro DR 1.1 / table / close / suspend / adjourn
+speakers list                        no motion: opens the speakers' list (also gsl, sl, speaker's list)
 ```
 
-While the line is being typed the roster turns into buttons that fill in the proposer. Proposers can be typed short: `usa`, `uk`, `drc`, `fra` all find the delegation on the roster. If the topic starts with a word that looks like a country, start it with `on`: `mod 9:45 on indo-pacific security`.
+While the line is being typed the roster comes up under the motions as buttons that fill in the proposer. Proposers can be typed short: `usa`, `uk`, `drc`, `fra` all find the delegation on the roster. If the topic starts with a word that looks like a country, start it with `on`: `mod 9:45 on indo-pacific security`.
 
-Motions are kept in voting order, most disruptive first (HMUN R36, MUNUC, MUNPrep): adjourn, suspend, extend, unmod, consultation, round robin, mod, speaking time, introduce, table, close debate. Longer caucuses go first. Between two mods of the same length, the one with more speakers goes first. Click **Pass** or **Fail** on the motion at the top. Procedural votes count the votes cast: a simple majority is more yes than no, and closing or tabling debate needs twice as many yes as no. When a motion passes, the others are dropped and the caucus is ready to start.
+Motions are kept in voting order, most disruptive first (HMUN R36, MUNUC, MUNPrep): adjourn, suspend, extend, unmod, consultation, round robin, mod, speaking time, introduce, table, close debate. Longer caucuses go first. Between two mods of the same length, the one with more speakers goes first. Click **Pass** or **Fail** on the motion at the top. Procedural votes count the votes cast: a simple majority is more yes than no, and closing or tabling debate needs twice as many yes as no. When a motion passes, the others are dropped and the caucus is ready to start. During a caucus the top bar has **End caucus** (or X twice), and after a suspension or the vote it has **Resume debate**.
 
 ### The moderated caucus clock
 
@@ -159,7 +160,7 @@ Press **V** for a substantive vote on a draft resolution: **Y** yes, **N** no, *
 | R | Restart the current speaker's clock |
 | Left / Right | Take off or give 10 seconds (with Shift, a minute) |
 | Y | Yield / right of reply |
-| A | Add speakers: type and press Enter; `fra, ger, bra` adds three, Shift+Enter puts the name next |
+| A | Add speakers: opens the speakers' list; type and press Enter; `fra, ger, bra` adds three, Shift+Enter puts the name next |
 | G | During a caucus, add to the general speakers' list instead |
 | M or a digit | Type a motion (a digit starts it with its length); E starts an extension |
 | X | End the caucus (press twice) |
@@ -168,14 +169,14 @@ Press **V** for a substantive vote on a draft resolution: **Y** yes, **N** no, *
 | F11 | Fullscreen |
 | Ctrl+Z | Undo the last action |
 | Ctrl+S / Ctrl+E / Ctrl+Q | Save now / export the log and speech counts / quit |
-| Esc | Leave a text box, close a dialog, leave presentation. It never quits |
+| Esc | Leave a text box, close a dialog, leave presentation, hide the speakers' list. It never quits |
 | F1 or ? | A summary of the keys and notation |
 
 Letters only act when no text box is being typed in.
 
 ### On the projector
 
-The window is laid out to be mirrored, and shows only what the room needs: what the committee is doing, the caucus topic, the speaker and the clock on the left, the speakers' list with crossed-out names and the motions on the right. There are no usage hints and no sounds; the chair keeps time with the gavel. **Presentation** (P or F5) gives the room the whole window: the clock and the list, nothing else. Move the mouse to get Start, Next and Leave buttons. All keys keep working, and B blanks the screen while the clocks keep running.
+The window is laid out to be mirrored, and shows only what the room needs. Outside the presentation that is the motions, nothing else. Type `speakers list` on the motion line (or `gsl`, `sl`, `speaker's list`; a typo in "speakers" or "list" is forgiven), or press A, and the speakers' list with crossed-out names comes out beside them; **Hide** or Esc puts it away. There are no usage hints and no sounds; the chair keeps time with the gavel. The clock is in the **presentation** (P or F5), which gives the room the whole window: what the committee is doing, the caucus topic, the speaker and the clock, with the list beside it, nothing else. Move the mouse to get Start, Next and Leave buttons. All keys keep working, and B blanks the screen while the clocks keep running.
 
 The clock shows its state with a fill, so it reads even on a washed-out projector:
 

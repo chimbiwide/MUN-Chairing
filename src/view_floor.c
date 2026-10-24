@@ -116,6 +116,11 @@ void focus_motion_line(App *app, const char *prefill) {
     focus_field(app, app->motion_quick);
 }
 
+void open_speakers_list(App *app) {
+    app->show_speakers = true;
+    focus_field(app, app->speaker_pick.text);
+}
+
 void act_toggle(App *app) {
     Session *session = &app->session;
     if (session->phase != PHASE_DEBATE) {
@@ -296,6 +301,24 @@ void draw_top_bar(App *app, Rectangle bounds) {
         x -= w + 6.0f * u;
         if (button(app, (Rectangle){ x, bounds.y + 8.0f * u, w, buttonH }, items[i].label, BUTTON_QUIET)) {
             open_overlay(app, items[i].overlay);
+        }
+    }
+
+    // ending a caucus (also X twice) and resuming debate after a suspension or the vote
+    if (session->phase != PHASE_DEBATE) {
+        float w = (float)GuiGetTextWidth("Resume debate") + 26.0f * u;
+        x -= w + 16.0f * u;
+        if (button(app, (Rectangle){ x, bounds.y + 8.0f * u, w, buttonH }, "Resume debate", BUTTON_PRIMARY)) {
+            before(app, "resume debate");
+            set_phase(session, PHASE_DEBATE, app->now);
+        }
+    }
+    else if (session->caucus.active) {
+        float w = (float)GuiGetTextWidth("End caucus") + 26.0f * u;
+        x -= w + 16.0f * u;
+        const char *label = is_armed(app, ARM_END_CAUCUS) ? "Sure?" : "End caucus";
+        if (button(app, (Rectangle){ x, bounds.y + 8.0f * u, w, buttonH }, label, BUTTON_DANGER) && confirm_armed(app, ARM_END_CAUCUS)) {
+            act_end_caucus(app);
         }
     }
 
@@ -630,14 +653,10 @@ static void draw_motion_block(App *app, Rectangle block) {
     }
 }
 
-void draw_stage(App *app, Rectangle bounds, bool presenting) {
+void draw_stage(App *app, Rectangle bounds) {
     Session *session = &app->session;
     float u = app->u;
-    if (!presenting) {
-        draw_clock_block(app, bounds, false);
-        return;
-    }
-    // the projector: the list beside the clock when the stage is wide enough, never during an unmod
+    // the list beside the clock when the stage is wide enough, never during an unmod
     float pad = bounds.height * 0.03f;
     Rectangle inner = { bounds.x + pad, bounds.y + pad, bounds.width - 2 * pad, bounds.height - 2 * pad };
     bool wide = !unmod_on(session) && inner.width / inner.height > 1.35f;
@@ -653,49 +672,6 @@ void draw_stage(App *app, Rectangle bounds, bool presenting) {
     const Clock *clock = floor_clock(session);
     if (session->motions.count > 0 && !session->caucus.active && (clock == NULL || !clock->running)) draw_motion_block(app, side);
     else draw_list_block(app, side, true, floor_list(session));
-}
-
-// one row of buttons under the clock
-void draw_transport(App *app, Rectangle area) {
-    Session *session = &app->session;
-    float u = app->u;
-    float gap = 8.0f * u;
-    float size = chair_text(app);
-    bool unmod = unmod_on(session);
-    const Clock *clock = unmod ? &session->caucus.total : floor_clock(session);
-    bool running = clock != NULL && clock->running;
-
-    float bigW = area.width * 0.3f;
-    Rectangle big = { area.x, area.y, bigW, area.height };
-    gui_size((int)(size * 1.15f));
-    if (session->phase != PHASE_DEBATE) {
-        if (button(app, big, "Resume debate", BUTTON_PRIMARY)) {
-            before(app, "resume debate");
-            set_phase(session, PHASE_DEBATE, app->now);
-        }
-        return;
-    }
-    if (button(app, big, running ? "Pause" : "Start", running ? BUTTON_PLAIN : BUTTON_GOOD)) act_toggle(app);
-
-    typedef struct { const char *label; int action; ButtonKind kind; } Item;
-    Item items[3];
-    int count = 0;
-    enum { NEXT, RESTART, END };
-    if (!unmod) items[count++] = (Item){ "Next", NEXT, BUTTON_PLAIN };
-    items[count++] = (Item){ "Restart", RESTART, BUTTON_PLAIN };
-    if (session->caucus.active) items[count++] = (Item){ is_armed(app, ARM_END_CAUCUS) ? "Sure?" : "End caucus", END, BUTTON_DANGER };
-    float x = big.x + bigW + gap;
-    float w = (area.x + area.width - x - (count - 1) * gap) / count;
-    gui_size((int)(size * 1.0f));
-    for (int i = 0; i < count; i++) {
-        Rectangle r = { x + i * (w + gap), area.y, w, area.height };
-        if (!button(app, r, items[i].label, items[i].kind)) continue;
-        switch (items[i].action) {
-            case NEXT: act_next(app); break;
-            case RESTART: act_restart(app); break;
-            case END: if (confirm_armed(app, ARM_END_CAUCUS)) act_end_caucus(app); break;
-        }
-    }
 }
 
 // the tiles of the roster, narrowed by the speaker box. while a motion is typed a click names its proposer
@@ -725,8 +701,11 @@ void draw_roster_grid(App *app, Rectangle area, bool for_motion) {
         return;
     }
 
-    int columns = grid.width > 440.0f * u ? 3 : 2;
     float gap = 6.0f * u;
+    // a column for every 140 px or so, from two to six
+    int columns = (int)((grid.width + gap) / (140.0f * u + gap));
+    if (columns < 2) columns = 2;
+    if (columns > 6) columns = 6;
     float tileW = (grid.width - (columns - 1) * gap) / columns;
     float tileH = size * 1.75f;
     int rows = (count + columns - 1) / columns;
@@ -803,9 +782,14 @@ void draw_speakers_panel(App *app, Rectangle area) {
     float pad = 10.0f * u;
     Rectangle inner = { area.x + pad, area.y + pad * 0.7f, area.width - 2 * pad, area.height - pad * 1.4f };
 
-    // heading: the list the box feeds (G turns a caucus's box to the speakers' list)
+    // heading: the list the box feeds (G turns a caucus's box to the speakers' list), and Hide (also Esc)
     float headH = size * 1.6f;
-    draw_text_in(app->bold, list_title(session, target), (Rectangle){ inner.x, inner.y, inner.width, headH }, size, t->text, 0);
+    gui_size((int)(size * 0.85f));
+    float hideW = text_width(app->font, "Hide", size * 0.85f) + 26.0f * u;
+    if (button(app, (Rectangle){ inner.x + inner.width - hideW, inner.y + headH * 0.1f, hideW, headH * 0.8f }, "Hide", BUTTON_QUIET)) {
+        app->show_speakers = false;
+    }
+    draw_text_in(app->bold, list_title(session, target), (Rectangle){ inner.x, inner.y, inner.width - hideW - 8.0f * u, headH }, size, t->text, 0);
 
     // the box: Enter adds the highlighted match and stays open for the next name
     Rectangle box = { inner.x, inner.y + headH + 4.0f * u, inner.width, size * 2.0f };

@@ -17,7 +17,7 @@ void trim_text(char *text);
 // replaces tabs, CR and LF with spaces so the text fits on one line of a save file
 void flatten_text(char *text);
 // lowercase ASCII with Latin-1 / Latin Extended-A accents removed ("Côte d'Ivoire" -> "cote divoire").
-// apostrophes and periods are dropped, other punctuation becomes a space, runs of spaces collapse
+// apostrophes (' ` ´ ‘ ’) and periods are dropped, other punctuation becomes a space, runs of spaces collapse
 void fold_name(const char *text, char *out, int size);
 // equal after fold_name
 bool same_name(const char *a, const char *b);

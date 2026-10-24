@@ -92,7 +92,7 @@ static void build_unmod(Session *session, double now) {
 }
 
 bool demo_scene_resized(int scene) {
-    return scene == 0 || scene == 2 || scene == 4 || scene == 6 || scene == 1;
+    return scene == 0 || scene == 2 || scene == 4 || scene == 6 || scene == 1 || scene == 7 || scene == 16;
 }
 
 const char *build_demo_scene(App *app, int scene) {
@@ -105,6 +105,7 @@ const char *build_demo_scene(App *app, int scene) {
     app->present = false;
     app->blank = false;
     app->add_to_gsl = false;
+    app->show_speakers = false;
     app->armed = ARM_NONE;
     app->list_scroll = 0.0f;
     app->speaker_pick.text[0] = '\0';
@@ -125,11 +126,13 @@ const char *build_demo_scene(App *app, int scene) {
             build_gsl(session, now - 1200.0, 30.0);
             next_speaker(session, now - 1150.0);
             build_mod(session, now, false);
+            app->show_speakers = true;
             return "mod";
         case 3:
             build_gsl(session, now - 1200.0, 30.0);
             next_speaker(session, now - 1150.0);
             build_mod(session, now, true);
+            app->present = true;
             return "mod_last_speaker";
         case 4:
             build_gsl(session, now - 1200.0, 30.0);
@@ -138,6 +141,7 @@ const char *build_demo_scene(App *app, int scene) {
             return "unmod";
         case 5:
             build_gsl(session, now, 67.0);
+            app->present = true;
             return "overtime";
         case 6:
             build_gsl(session, now - 1200.0, 30.0);
@@ -185,11 +189,23 @@ const char *build_demo_scene(App *app, int scene) {
             build_gsl(session, now, 51.0);
             build_motions(session);
             session->settings.dark = true;
+            app->show_speakers = true;
             return "dark";
         case 15:
             build_gsl(session, now, 23.4);
             set_phase(session, PHASE_VOTING, now);
             return "voting_phase";
+        case 16:
+            build_gsl(session, now, 23.4);
+            build_motions(session);
+            copy_text(app->speaker_pick.text, sizeof(app->speaker_pick.text), "ger");
+            open_speakers_list(app);
+            return "add_speakers";
+        case 17:
+            build_gsl(session, now, 23.4);
+            set_phase(session, PHASE_VOTING, now);
+            app->present = true;
+            return "present_voting";
         default:
             // Brazil finished, the chair takes motions with the room watching
             build_gsl(session, now - 30.0, 50.0);

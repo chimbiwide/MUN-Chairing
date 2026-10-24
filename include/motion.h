@@ -92,6 +92,10 @@ void describe_motion(const Motion *motion, char *buffer, int size);
 // Fails with a short message when the kind is unknown, a needed length is missing or invalid, or
 // check_motion refuses the result.
 bool parse_motion_line(const char *text, const Roster *roster, Motion *out, char *error, int error_size);
+// true when the line asks for the speakers' list instead of naming a motion: "speakers list",
+// "Speaker's List", "gsl", "sl", "open the general speakers' list", "motion to open the speakers list".
+// fold_name evens out case and apostrophes, and "speaker(s)" and "list" may each have one slip ("speakrs lsit")
+bool asks_for_speakers_list(const char *text);
 
 void clear_motions(MotionList *list);
 // copies motion in and stamps the next serial, -1 when full

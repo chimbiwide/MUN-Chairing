@@ -88,7 +88,7 @@ static const char *fold_codepoint(int cp) {
         letter[1] = '\0';
         return letter;
     }
-    if (cp == 0x2018 || cp == 0x2019 || cp == 0xB4 || cp == 0x60) return "";
+    if (cp == 0x2018 || cp == 0x2019 || cp == 0xB4) return "";
     if (cp == 0xA0 || (cp >= 0x2010 && cp <= 0x2015)) return " ";
     if (cp >= 0x80 && cp < 0xC0) return " ";
     return NULL;
@@ -113,7 +113,7 @@ void fold_name(const char *text, char *out, int size) {
                 ascii[0] = (char)tolower(cp);
                 folded = ascii;
             }
-            else if (cp == '\'' || cp == '.') folded = "";
+            else if (cp == '\'' || cp == '`' || cp == '.') folded = "";
             else folded = " ";
         }
         else if (cp >= 0x80) folded = fold_codepoint(cp);

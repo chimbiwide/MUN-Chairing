@@ -3,11 +3,11 @@
 
 #include <ui.h>
 
-// view_floor.c: the main screen. the clock and the lists face the room, the buttons are the chair's
+// view_floor.c: the floor. the chair's screen has the top bar and, when asked for, the speakers' list;
+// the projector has the clock
 void draw_top_bar(App *app, Rectangle bounds);
-// operator view: the clock block only; presenting: the clock with the speakers list beside it
-void draw_stage(App *app, Rectangle bounds, bool presenting);
-void draw_transport(App *app, Rectangle bounds);
+// the projector's clock, with the speakers list (or the motions waiting) beside it when there is room
+void draw_stage(App *app, Rectangle bounds);
 void draw_speakers_panel(App *app, Rectangle bounds);
 // tiles of the roster narrowed by the speaker box; for_motion makes a click name the motion's proposer
 void draw_roster_grid(App *app, Rectangle bounds, bool for_motion);
@@ -26,6 +26,8 @@ void act_import_text(App *app, const char *text, const char *source);
 void open_overlay(App *app, Overlay overlay);
 // focuses the motion line, replacing its text with prefill unless prefill is NULL
 void focus_motion_line(App *app, const char *prefill);
+// brings the speakers' list out beside the motions and focuses its add box
+void open_speakers_list(App *app);
 
 // view_motions.c
 void draw_motions_panel(App *app, Rectangle bounds);

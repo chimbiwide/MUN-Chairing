@@ -4,7 +4,7 @@
 #include <stdbool.h>
 #include <ui.h>
 
-#define DEMO_SCENES 17
+#define DEMO_SCENES 19
 
 // fills app with a sample committee arranged for one scene (clocks relative to app->now)
 // and returns a short name for the screenshot file

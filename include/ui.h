@@ -84,6 +84,8 @@ typedef struct {
     char *focus;
     bool typing;            // focus was set when the frame began
     char *focus_before;     // the box that had focus when the frame began
+    char *layout_focus;     // the focus the panels are laid out for; it waits while the mouse button is down,
+                            // so a press that takes the focus away can't move a button before its release lands
     bool dirty;             // session changed since the last save
     double saved_at;
     bool save_failed;
@@ -98,6 +100,7 @@ typedef struct {
     Vector2 last_mouse;
     bool blank;             // presentation shows a black screen, the clocks keep running
     bool add_to_gsl;        // during a caucus the add box feeds the GSL instead of the caucus list
+    bool show_speakers;     // the speakers' list is out beside the motions ("speakers list" on the motion line, or A)
     float list_scroll;      // first visible row of the speakers list, eased
     float grid_scroll;
     float motion_scroll;

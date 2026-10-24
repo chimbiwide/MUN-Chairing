@@ -91,6 +91,10 @@ static void vote_on(App *app, int index, int yes, int no, bool passed) {
 
 // how the line reads, so a mod and an unmod can be told apart before Enter; nothing until it reads
 static void echo_line(App *app, const char *line, Rectangle bounds) {
+    if (asks_for_speakers_list(line)) {
+        draw_text_in(app->bold, "Open the speakers' list", bounds, chair_text(app) * 0.9f, app->theme.text, 0);
+        return;
+    }
     Motion parsed;
     char error[ERROR_SIZE];
     if (!parse_motion_line(line, &app->session.roster, &parsed, error, sizeof(error))) return;
@@ -118,6 +122,12 @@ void set_motion_proposer(App *app, const char *name) {
 
 static void submit_motion(App *app) {
     Session *session = &app->session;
+    // no motion: the speakers' list comes out beside the motions, ready for names
+    if (asks_for_speakers_list(app->motion_quick)) {
+        app->motion_quick[0] = '\0';
+        open_speakers_list(app);
+        return;
+    }
     Motion parsed;
     char error[ERROR_SIZE];
     if (!parse_motion_line(app->motion_quick, &session->roster, &parsed, error, sizeof(error))) {

@@ -31,7 +31,7 @@ void draw_present(App *app) {
     draw_text_in(app->bold, head, (Rectangle){ margin, margin, width - 2 * margin - clockW - 20.0f, headH }, headSize, t->muted, 0);
 
     Rectangle stage = { margin * 0.5f, margin + headH, width - margin, height - 1.5f * margin - headH };
-    draw_stage(app, stage, true);
+    draw_stage(app, stage);
 
     // moving the mouse shows a strip with the chair's main buttons for a few seconds
     if (app->now - app->mouse_moved_at < 3.0 && app->overlay == OVERLAY_NONE) {

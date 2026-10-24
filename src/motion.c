@@ -562,6 +562,54 @@ bool parse_motion_line(const char *text, const Roster *roster, Motion *out, char
     return true;
 }
 
+// words that may stand around the name of the list: "motion to open the general speakers' list"
+static const char *const LIST_WORDS[] = {"motion", "to", "open", "show", "the", "general"};
+
+// word is known but for one slip: a letter missing, extra or wrong, or two neighbours swapped
+static bool near_word(const Word *word, const char *known) {
+    const char *typed = word->start;
+    size_t length = word->length;
+    size_t wanted = strlen(known);
+    if (length == wanted) {
+        size_t at = 0;
+        while (at < length && typed[at] == known[at]) at++;
+        if (at + 1 >= length) return true;
+        // one wrong letter, or this one swapped with the next
+        if (memcmp(typed + at + 1, known + at + 1, length - at - 1) == 0) return true;
+        return typed[at] == known[at + 1] && typed[at + 1] == known[at] &&
+               memcmp(typed + at + 2, known + at + 2, length - at - 2) == 0;
+    }
+    // one letter more or less: the longer word without its first odd letter is the shorter one
+    if (length + 1 != wanted && wanted + 1 != length) return false;
+    const char *longer = length > wanted ? typed : known;
+    const char *shorter = length > wanted ? known : typed;
+    size_t shared = length < wanted ? length : wanted;
+    size_t at = 0;
+    while (at < shared && longer[at] == shorter[at]) at++;
+    return memcmp(longer + at + 1, shorter + at, shared - at) == 0;
+}
+
+bool asks_for_speakers_list(const char *text) {
+    // a typed line is far shorter
+    char folded[256];
+    fold_name(text, folded, sizeof(folded));
+    WordList words;
+    split_words(folded, &words);
+    // the name of the list, once the words around it are set aside
+    const Word *name[2];
+    int count = 0;
+    for (int i = 0; i < words.count; i++) {
+        if (word_in(&words.items[i], LIST_WORDS, COUNT_OF(LIST_WORDS))) continue;
+        if (count == 2) return false;
+        name[count++] = &words.items[i];
+    }
+    if (count == 1) {
+        return is_word(name[0], "gsl") || is_word(name[0], "sl") || near_word(name[0], "speakers") ||
+               near_word(name[0], "speaker") || near_word(name[0], "speakerslist") || near_word(name[0], "speakerlist");
+    }
+    return count == 2 && (near_word(name[0], "speakers") || near_word(name[0], "speaker")) && near_word(name[1], "list");
+}
+
 // count kept inside the array in case a caller wrote a bad one
 static int motion_count(const MotionList *list) {
     if (list->count < 0) return 0;

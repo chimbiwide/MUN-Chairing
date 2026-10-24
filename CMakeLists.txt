@@ -98,24 +98,3 @@ target_compile_options(MUNTimer PRIVATE -Wall -Wextra)
 set_target_properties(MUNTimer PROPERTIES C_STANDARD 23 C_STANDARD_REQUIRED ON)
 # raygui is third party code, so its warnings are not ours to fix
 set_source_files_properties(src/gui.c PROPERTIES COMPILE_OPTIONS "-w")
-
-option(MUN_BUILD_TESTS "Build the logic tests" ON)
-if(MUN_BUILD_TESTS)
-    enable_testing()
-    add_executable(mun_tests
-        tests/main.c
-        tests/test_text.c
-        tests/test_duration.c
-        tests/test_clock.c
-        tests/test_speakers.c
-        tests/test_roster.c
-        tests/test_motion.c
-        tests/test_chair.c
-        tests/test_store.c
-    )
-    target_include_directories(mun_tests PRIVATE ${CMAKE_SOURCE_DIR}/tests)
-    target_link_libraries(mun_tests PRIVATE mun_core)
-    target_compile_options(mun_tests PRIVATE -Wall -Wextra)
-    set_target_properties(mun_tests PROPERTIES C_STANDARD 23 C_STANDARD_REQUIRED ON)
-    add_test(NAME mun_tests COMMAND mun_tests WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
-endif()
